@@ -65,3 +65,7 @@ def test_package_crud(app):
     assert data['id'] == new_obj['id']
     for key in ('name', 'title', 'license'):
         assert data[key] == obj[key]
+
+    ## Update
+    obj['license'] = 'cc-by-sa'
+    result = app.put('/api/1/package/{0}/'.format(new_obj['id']))

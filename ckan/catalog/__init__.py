@@ -158,10 +158,28 @@ class ModelResource(restful.Resource):
         return self._serialize(new)  # todo: return 201 Created instead?
 
     def put(self, obj_id):
-        pass
+        obj = self._get(obj_id)
+        obj.attributes = request.json
+        db.session.commit()
 
     def patch(self, obj_id):
-        pass
+        obj = self._get(obj_id)
+        for key, value in request.json.iteritems():
+            if key.startswith('$'):
+                ## Custom action -- handle separately
+                if key == '$del':
+                    for k in value:
+                        if k in obj.attributes:
+                            del obj.attributes[k]
+                elif key == '$set':
+                    for k, v in value.iteritems():
+                        obj.attributes[k] = v
+                else:
+                    restful.abort(
+                        400, message="Invalid PATCH key: {0}".format(key))
+            else:
+                obj.attributes[key] = value
+        db.session.commit()
 
     def delete(self, obj_id):
         ## todo: on package deletion, remove resources?
@@ -186,6 +204,10 @@ class PackageResourcesResource(ModelResource):
         self._query = Package.query.filter_by(id=obj_id).one().resources
         return super(PackageResourcesResource, self).get()
 
+    def post(self, obj_id):
+        ## todo: create a resource
+        pass
+
 
 class ResourceResource(ModelResource):
     model = Resource
@@ -197,6 +219,7 @@ class ResourceResource(ModelResource):
 
 
 def api_url(rel):
+    """Shortcut for generating versioned API URLs"""
     return '/api/1/{0}/'.format(rel)
 
 
