@@ -76,3 +76,21 @@ The following GET arguments are supported in order to control pagination:
 * ``page_size`` - Amount of results per page to be returned
 
 The ``Link`` header will contain links to first/prev/next/last pages.
+
+
+## Testing
+
+Preparation for test run:
+
+* Create a fresh database (remember to CREATE EXTENSION hstore!)
+* Copy local_settings.py -> local_settings_test.py and change settings
+
+Running tests::
+
+	CKAN_SETTINGS=$PWD/local_settings_test.py \
+		py.test --pep8 -v ckan
+
+Enable coverage report::
+
+	CKAN_SETTINGS=$PWD/local_settings_test.py \
+		py.test --pep8 -v ckan --cov=ckan --cov-report=term-missing
