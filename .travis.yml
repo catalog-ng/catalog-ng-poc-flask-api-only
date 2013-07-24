@@ -1,0 +1,24 @@
+language: python
+
+services:
+  - postgresql
+
+branches:
+  except:
+    - gh-pages
+
+python:
+  - "2.7"
+
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+
+install:
+  - pip install tox --use-mirrors
+
+before_script:
+  - './scripts/create_test_settings.sh'
+  - psql -c 'CREATE DATABASE ckan3_test;' -U postgres
+
+script: tox
