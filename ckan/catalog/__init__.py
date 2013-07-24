@@ -36,13 +36,16 @@ app.config.from_envvar('CKAN_SETTINGS')
 db = SQLAlchemy(app)
 
 
-## to query:  Package.query.filter(Package.attributes['example'] == 'hello').all()
+## to query HSTORE:
+## Package.query.filter(Package.attributes['example'] == 'hello').all()
 
 class Package(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     attributes = db.Column(MutableDict.as_mutable(HSTORE))
-    resources = db.relationship('Resource',
-        backref='package', lazy='dynamic')
+    resources = db.relationship(
+        'Resource',
+        backref='package',
+        lazy='dynamic')
 
 
 class Resource(db.Model):
@@ -56,8 +59,13 @@ class Resource(db.Model):
 api = restful.Api(app)
 
 
-class PaginatedResource(restful.Resource):
-    model = None # Must be overridden by subclasses
+class ModelResource(restful.Resource):
+    """
+    Common methods for exposing SQLAlchemy models through
+    flask-restful
+    """
+
+    model = None  # Must be overridden by subclasses
     _query = None
 
     @property
@@ -68,7 +76,8 @@ class PaginatedResource(restful.Resource):
 
     def _serialize(self, obj):
         data = {}
-        data.update(obj.attributes)
+        if obj.attributes is not None:
+            data.update(obj.attributes)
         data['id'] = obj.id
         return data
 
@@ -77,7 +86,7 @@ class PaginatedResource(restful.Resource):
             return self.query.filter_by(id=obj_id).one()
         except NoResultFound:
             restful.abort(404, message='Requested object not found')
-        
+
     def get(self, obj_id=None):
         if obj_id is None:
             ## todo: load filters from arguments
@@ -92,17 +101,19 @@ class PaginatedResource(restful.Resource):
                 except ValueError:
                     restful.abort(400, message="Page size must be an integer")
                 if page_size < 1:
-                    restful.abort(400, message="Page size must be greater than zero")
+                    restful.abort(
+                        400, message="Page size must be greater than zero")
                 if page_size > 100:
                     page_size = 100
 
             pages_count = int(ceil(query.count() * 1.0 / page_size))
-            max_page = pages_count  - 1
-                
+            max_page = pages_count - 1
+
             if 'page' in request.args:
                 page = int(request.args['page'])
                 if page < 0:
-                    restful.abort(400, message='Page number cannot be negative')
+                    restful.abort(
+                        400, message='Page number cannot be negative')
                 if page > max_page:
                     restful.abort(404, message='Page number out of range')
 
@@ -116,7 +127,7 @@ class PaginatedResource(restful.Resource):
                 if query_string:
                     return '{0}?{1}'.format(request.base_url, query_string)
                 return request.base_url
-            
+
             if page > 0:
                 links.append("<{0}>; rel=\"first\""
                              "".format(get_url(page=0,
@@ -131,8 +142,8 @@ class PaginatedResource(restful.Resource):
                 links.append("<{0}>; rel=\"last\""
                              "".format(get_url(page=max_page,
                                                page_size=page_size)))
-            
-            headers = {'Link': ", ".join(links)} 
+
+            headers = {'Link': ", ".join(links)}
             results = query.slice(page * page_size, (page + 1) * page_size)
             return [self._serialize(o) for o in results], 200, headers
 
@@ -144,7 +155,7 @@ class PaginatedResource(restful.Resource):
         new.attributes = request.json
         db.session.add(new)
         db.session.commit()
-        return self._serialize(new)
+        return self._serialize(new)  # todo: return 201 Created instead?
 
     def put(self, obj_id):
         pass
@@ -161,22 +172,22 @@ class PaginatedResource(restful.Resource):
         db.session.commit()
 
 
-class PackageResource(PaginatedResource):
+class PackageResource(ModelResource):
     model = Package
 
 
-class PackageResourcesResource(PaginatedResource):
+class PackageResourcesResource(ModelResource):
     def _serialize(self, obj):
         serialized = super(PackageResourcesResource, self)._serialize(obj)
         serialized['package_id'] = obj.package_id
         return serialized
-    
+
     def get(self, obj_id):
         self._query = Package.query.filter_by(id=obj_id).one().resources
         return super(PackageResourcesResource, self).get()
 
 
-class ResourceResource(PaginatedResource):
+class ResourceResource(ModelResource):
     model = Resource
 
     def _serialize(self, obj):
