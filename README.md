@@ -1,6 +1,6 @@
 # CKAN 3.0 poc
 
-[![Build Status](https://travis-ci.org/rshk/ckan3-poc-experiments.png?branch=master)](https://travis-ci.org/rshk/ckan3-poc-experiments)))]]
+[![Build Status](https://travis-ci.org/rshk/ckan3-poc-experiments.png?branch=master)](https://travis-ci.org/rshk/ckan3-poc-experiments)
 
 This is just a proof-of-concept of a possible way to make
 [CKAN](http://ckan.org) way simpler, by making it do just one thing
