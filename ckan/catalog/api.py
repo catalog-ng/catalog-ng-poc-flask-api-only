@@ -135,7 +135,7 @@ class ModelResource(restful.Resource):
         db.session.commit()
 
     def delete(self, obj_id):
-        ## todo: on package deletion, remove resources?
+        ## todo: on dataset deletion, remove resources?
         ## or, safer, disallow deletion if still referenced
         ## -> should be that way by default, btw
         obj = self._get(obj_id)
@@ -143,19 +143,19 @@ class ModelResource(restful.Resource):
         db.session.commit()
 
 
-class PackageResource(ModelResource):
+class DatasetResource(ModelResource):
     model = Dataset
 
 
-class PackageResourcesResource(ModelResource):
+class DatasetResourcesResource(ModelResource):
     def _serialize(self, obj):
-        serialized = super(PackageResourcesResource, self)._serialize(obj)
-        serialized['package_id'] = obj.package_id
+        serialized = super(DatasetResourcesResource, self)._serialize(obj)
+        serialized['dataset_id'] = obj.dataset_id
         return serialized
 
     def get(self, obj_id):
         self._query = Dataset.query.filter_by(id=obj_id).one().resources
-        return super(PackageResourcesResource, self).get()
+        return super(DatasetResourcesResource, self).get()
 
     def post(self, obj_id):
         ## todo: create a resource
@@ -167,7 +167,7 @@ class ResourceResource(ModelResource):
 
     def _serialize(self, obj):
         serialized = super(ResourceResource, self)._serialize(obj)
-        serialized['package_id'] = obj.package_id
+        serialized['dataset_id'] = obj.dataset_id
         return serialized
 
 
@@ -176,11 +176,11 @@ def api_url(rel):
     return '/api/1/{0}/'.format(rel)
 
 
-api.add_resource(PackageResource,
-                 api_url('package'),
-                 api_url('package/<int:obj_id>'))
-api.add_resource(PackageResourcesResource,
-                 api_url('package/<int:obj_id>/resources'))
+api.add_resource(DatasetResource,
+                 api_url('dataset'),
+                 api_url('dataset/<int:obj_id>'))
+api.add_resource(DatasetResourcesResource,
+                 api_url('dataset/<int:obj_id>/resources'))
 api.add_resource(ResourceResource,
                  api_url('resource'),
                  api_url('resource/<int:obj_id>'))

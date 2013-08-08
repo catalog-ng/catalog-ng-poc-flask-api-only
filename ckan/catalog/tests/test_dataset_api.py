@@ -23,8 +23,8 @@ def app(request):
     return ckan_app.test_client()
 
 
-def test_package_crud(app):
-    result = app.get('/api/1/package/')
+def test_dataset_crud(app):
+    result = app.get('/api/1/dataset/')
     assert result.status_code == 200
 
     ## To check that this is valid JSON
@@ -33,13 +33,13 @@ def test_package_crud(app):
     ## Make sure the db is empty
     assert len(data) == 0
 
-    ## Create package
+    ## Create dataset
     obj = {
-        'name': 'example-package',
-        'title': 'Example Package',
+        'name': 'example-dataset',
+        'title': 'Example Dataset',
         'license': 'cc-zero',
     }
-    result = app.post('/api/1/package/',
+    result = app.post('/api/1/dataset/',
                       data=json.dumps(obj),
                       content_type='application/json')
     assert result.status_code == 200
@@ -51,15 +51,15 @@ def test_package_crud(app):
     dbobj = Dataset.query.filter_by(id=new_obj['id']).one()
     assert dbobj.attributes['name'] == obj['name']
 
-    ## Check that we have it in the packages list
-    result = app.get('/api/1/package/')
+    ## Check that we have it in the datasets list
+    result = app.get('/api/1/dataset/')
     assert result.status_code == 200
     data = json.loads(result.data)
     assert len(data) == 1
     assert new_obj['id'] == data[0]['id']
 
-    ## Retrieve the package
-    result = app.get('/api/1/package/{0}/'.format(new_obj['id']))
+    ## Retrieve the dataset
+    result = app.get('/api/1/dataset/{0}/'.format(new_obj['id']))
     assert result.status_code == 200
     data = json.loads(result.data)
     assert data['id'] == new_obj['id']
@@ -68,4 +68,4 @@ def test_package_crud(app):
 
     ## Update
     obj['license'] = 'cc-by-sa'
-    result = app.put('/api/1/package/{0}/'.format(new_obj['id']))
+    result = app.put('/api/1/dataset/{0}/'.format(new_obj['id']))

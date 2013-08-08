@@ -10,7 +10,7 @@ db = SQLAlchemy(app)
 
 
 ## to query HSTORE:
-## Package.query.filter(Package.attributes['example'] == 'hello').all()
+## Dataset.query.filter(Dataset.attributes['example'] == 'hello').all()
 
 
 # Catalog data can go in a configuration file
@@ -23,7 +23,7 @@ class Dataset(db.Model):
     attributes = db.Column(MutableDict.as_mutable(HSTORE))
     distributions = db.relationship(
         'Distribution',
-        backref='package',
+        backref='dataset',
         lazy='dynamic')
 
 
@@ -32,3 +32,15 @@ class Distribution(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     attributes = db.Column(MutableDict.as_mutable(HSTORE))
     dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))
+
+
+# class Person(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     attributes = db.Column(MutableDict.as_mutable(HSTORE))
+#     pass
+
+
+# class Organization(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     attributes = db.Column(MutableDict.as_mutable(HSTORE))
+#     pass

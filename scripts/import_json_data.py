@@ -42,7 +42,7 @@ for row_id, row in enumerate(data):
     for resource in row['resources']:
         res = Distribution()
         res.attributes = row_to_hstore(resource)
-        res.package = pkg
+        res.dataset = pkg
         db.session.add(res)
 
     db.session.commit()
