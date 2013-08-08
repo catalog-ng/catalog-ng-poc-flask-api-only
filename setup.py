@@ -5,20 +5,21 @@ from pkg_resources import normalize_path
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-version = '0.1'
+version = '3.0-alpha'
 
 install_requires = [
     'Flask',
-    "Flask-OpenID",
+    #"Flask-OpenID",  # Maybe in the future..
     "Flask-SQLAlchemy",
     "Flask-RESTful",
+    #"Flask-Restless",  # ?
     "psycopg2",
 ]
 
 tests_require = [
     'pytest',
     'pytest-pep8',
-#    'pytest-cov',
+    'pytest-cov',
 ]
 
 extra = {}
