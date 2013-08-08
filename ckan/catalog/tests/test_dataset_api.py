@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from ckan.catalog import db, app as ckan_app, Package
+from ckan.catalog import db, app as ckan_app, Dataset
 
 
 @pytest.fixture(scope="module")
@@ -48,7 +48,7 @@ def test_package_crud(app):
         assert new_obj[key] == obj[key]
 
     ## Check that the inserted object is ok
-    dbobj = Package.query.filter_by(id=new_obj['id']).one()
+    dbobj = Dataset.query.filter_by(id=new_obj['id']).one()
     assert dbobj.attributes['name'] == obj['name']
 
     ## Check that we have it in the packages list

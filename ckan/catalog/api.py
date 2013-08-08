@@ -6,7 +6,7 @@ from flask.ext import restful
 from sqlalchemy.orm.exc import NoResultFound
 
 from .app import app
-from .models import db, Package, Resource
+from .models import db, Dataset, Distribution
 
 
 api = restful.Api(app)
@@ -144,7 +144,7 @@ class ModelResource(restful.Resource):
 
 
 class PackageResource(ModelResource):
-    model = Package
+    model = Dataset
 
 
 class PackageResourcesResource(ModelResource):
@@ -154,7 +154,7 @@ class PackageResourcesResource(ModelResource):
         return serialized
 
     def get(self, obj_id):
-        self._query = Package.query.filter_by(id=obj_id).one().resources
+        self._query = Dataset.query.filter_by(id=obj_id).one().resources
         return super(PackageResourcesResource, self).get()
 
     def post(self, obj_id):
@@ -163,7 +163,7 @@ class PackageResourcesResource(ModelResource):
 
 
 class ResourceResource(ModelResource):
-    model = Resource
+    model = Distribution
 
     def _serialize(self, obj):
         serialized = super(ResourceResource, self)._serialize(obj)

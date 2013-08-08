@@ -12,16 +12,23 @@ db = SQLAlchemy(app)
 ## to query HSTORE:
 ## Package.query.filter(Package.attributes['example'] == 'hello').all()
 
-class Package(db.Model):
+
+# Catalog data can go in a configuration file
+# http://www.w3.org/TR/vocab-dcat/#class-catalog
+
+
+class Dataset(db.Model):
+    ## See: http://www.w3.org/TR/vocab-dcat/#class-dataset
     id = db.Column(db.Integer, primary_key=True)
     attributes = db.Column(MutableDict.as_mutable(HSTORE))
-    resources = db.relationship(
-        'Resource',
+    distributions = db.relationship(
+        'Distribution',
         backref='package',
         lazy='dynamic')
 
 
-class Resource(db.Model):
+class Distribution(db.Model):
+    ## See: http://www.w3.org/TR/vocab-dcat/#class-distribution
     id = db.Column(db.Integer, primary_key=True)
     attributes = db.Column(MutableDict.as_mutable(HSTORE))
-    package_id = db.Column(db.Integer, db.ForeignKey('package.id'))
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))

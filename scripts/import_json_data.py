@@ -2,7 +2,7 @@
 
 ## Import data from CKAN json file
 
-from ckan.catalog import db, Package, Resource
+from ckan.catalog import db, Dataset, Distribution
 import json
 
 ## todo: ``CREATE EXTENSION hstore`` too?
@@ -35,12 +35,12 @@ for row_id, row in enumerate(data):
     _row = row.copy()
     del _row['resources']
 
-    pkg = Package()
+    pkg = Dataset()
     pkg.attributes = row_to_hstore(_row)
     db.session.add(pkg)
 
     for resource in row['resources']:
-        res = Resource()
+        res = Distribution()
         res.attributes = row_to_hstore(resource)
         res.package = pkg
         db.session.add(res)
