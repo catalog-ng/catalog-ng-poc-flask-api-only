@@ -58,5 +58,8 @@ tramp
 .org-id-locations
 *_archive
 
+# PyCharm
+/.idea
+
 # CKAN-specific
 local_settings*.py
