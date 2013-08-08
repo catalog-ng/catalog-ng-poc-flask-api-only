@@ -14,7 +14,7 @@ install_requires = [
     "Flask-RESTful",
     #"Flask-Restless",  # ?
     "psycopg2",
-    "six", # This is apparently needed..
+    "six",  # This is apparently needed..
 ]
 
 tests_require = [
