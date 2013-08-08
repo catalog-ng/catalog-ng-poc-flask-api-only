@@ -9,7 +9,7 @@ from .app import app
 from .models import db, Dataset, Distribution
 
 
-api = restful.Api(app)
+api = restful.Api(app, prefix='/api/1')
 
 
 class ModelResource(restful.Resource):
@@ -63,7 +63,11 @@ class ModelResource(restful.Resource):
             max_page = pages_count - 1
 
             if 'page' in request.args:
-                page = int(request.args['page'])
+                try:
+                    page = int(request.args['page'])
+                except ValueError:
+                    restful.abort(400,
+                                  message="Page number must be an integer")
                 if page < 0:
                     restful.abort(
                         400, message='Page number cannot be negative')
@@ -112,7 +116,10 @@ class ModelResource(restful.Resource):
 
     def put(self, obj_id):
         obj = self._get(obj_id)
-        obj.attributes = request.json
+        #obj.attributes = request.json
+        for key, value in request.json.iteritems():
+            obj.attributes[key] = value
+        #obj.attributes.update(request.json)
         db.session.commit()
 
     def patch(self, obj_id):
@@ -135,7 +142,7 @@ class ModelResource(restful.Resource):
         db.session.commit()
 
     def delete(self, obj_id):
-        ## todo: on dataset deletion, remove resources?
+        ## todo: on dataset deletion, remove distributions?
         ## or, safer, disallow deletion if still referenced
         ## -> should be that way by default, btw
         obj = self._get(obj_id)
@@ -147,40 +154,36 @@ class DatasetResource(ModelResource):
     model = Dataset
 
 
-class DatasetResourcesResource(ModelResource):
+class DatasetDistributionsResource(ModelResource):
     def _serialize(self, obj):
-        serialized = super(DatasetResourcesResource, self)._serialize(obj)
+        serialized = super(DatasetDistributionsResource, self)._serialize(obj)
         serialized['dataset_id'] = obj.dataset_id
         return serialized
 
     def get(self, obj_id):
+        ## Use a custom query, as we want to filter on the dataset id
         self._query = Dataset.query.filter_by(id=obj_id).one().resources
-        return super(DatasetResourcesResource, self).get()
+        return super(DatasetDistributionsResource, self).get()
 
     def post(self, obj_id):
         ## todo: create a resource
         pass
 
 
-class ResourceResource(ModelResource):
+class DistributionResource(ModelResource):
     model = Distribution
 
     def _serialize(self, obj):
-        serialized = super(ResourceResource, self)._serialize(obj)
+        serialized = super(DistributionResource, self)._serialize(obj)
         serialized['dataset_id'] = obj.dataset_id
         return serialized
 
 
-def api_url(rel):
-    """Shortcut for generating versioned API URLs"""
-    return '/api/1/{0}/'.format(rel)
-
-
 api.add_resource(DatasetResource,
-                 api_url('dataset'),
-                 api_url('dataset/<int:obj_id>'))
-api.add_resource(DatasetResourcesResource,
-                 api_url('dataset/<int:obj_id>/resources'))
-api.add_resource(ResourceResource,
-                 api_url('resource'),
-                 api_url('resource/<int:obj_id>'))
+                 '/dataset/',
+                 '/dataset/<int:obj_id>/')
+api.add_resource(DatasetDistributionsResource,
+                 '/dataset/<int:obj_id>/resources/')
+api.add_resource(DistributionResource,
+                 '/distribution/',
+                 '/distribution/<int:obj_id>/')
